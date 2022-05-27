@@ -10,6 +10,7 @@ typedef enum operacao {nop=0, bcompress=1, bdecompress=2, gcompress=3, gdecompre
 
 typedef enum status { Pending=0, Proccessing=1, Done=2} Status;
 
+
 typedef struct pedido
 {
     pid_t pid;

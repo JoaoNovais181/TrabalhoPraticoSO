@@ -1,6 +1,12 @@
 #include "Pedido.h"
 
-
+/**
+ * @brief Function to create Pedido
+ * 
+ * @param line line to add to structure
+ * @param status status of the task
+ * @return Pedido Task with specified parameters
+ */
 Pedido criaPedido (char *line, Status status)
 {
     Pedido pedido;

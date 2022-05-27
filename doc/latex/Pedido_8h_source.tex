@@ -1,0 +1,30 @@
+\hypertarget{Pedido_8h_source}{}\doxysection{Pedido.\+h}
+\label{Pedido_8h_source}\index{/home/tbag/TrabalhoPraticoSO/src/Pedido.h@{/home/tbag/TrabalhoPraticoSO/src/Pedido.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef PEDIDO}}
+\DoxyCodeLine{2 }
+\DoxyCodeLine{3 \textcolor{preprocessor}{\#define PEDIDO}}
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <unistd.h>}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#include <string.h>}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#define BUF\_MAX 256}}
+\DoxyCodeLine{8 }
+\DoxyCodeLine{9 \textcolor{keyword}{typedef} \textcolor{keyword}{enum} operacao \{nop=0, bcompress=1, bdecompress=2, gcompress=3, gdecompress=4, encrypt=5, decrypt=6\} Operacao;}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{keyword}{typedef} \textcolor{keyword}{enum} status \{ Pending=0, Proccessing=1, Done=2\} Status;}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structpedido}{pedido}}}
+\DoxyCodeLine{15 \{}
+\DoxyCodeLine{16     pid\_t pid;}
+\DoxyCodeLine{17     Status status;}
+\DoxyCodeLine{18     \textcolor{keywordtype}{char} line[BUF\_MAX];}
+\DoxyCodeLine{19     \textcolor{keywordtype}{int} usage[7];}
+\DoxyCodeLine{20 \} \mbox{\hyperlink{structpedido}{Pedido}}, *\mbox{\hyperlink{structpedido}{PPedido}};}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \mbox{\hyperlink{structpedido}{Pedido}} criaPedido (\textcolor{keywordtype}{char} *line, Status status);}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

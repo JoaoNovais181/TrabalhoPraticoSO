@@ -1,3 +1,6 @@
+/**
+ * @file File that contains the implementation of the server SDSTORED
+ */
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -41,6 +44,14 @@ static Queue pedidos;
 static char *transfDirectory;
 
 /**
+ * @brief Function that prints s to stderr
+ */
+void myPerror (const char *s)
+{
+	write(2, s, strlen(s));
+}
+
+/** \fn char **tokenize (char *command, int *N)
  * @brief Tokenizes string by using ' ' as a delimiter
  * 
  * @param command String to tokenize
@@ -53,7 +64,6 @@ char **tokenize (char *command, int *N)
     int max = 20, i=0;
     char *string;
     char **exec_args = malloc(max * sizeof(char *));
-
 
     while ((string = strsep(&command, " \n"))!=NULL)
     {
@@ -75,6 +85,12 @@ char **tokenize (char *command, int *N)
 
 /*   Funcoes de gestao de operacoes */
 
+/**
+ * @brief Function to check if a certain task is executable, by verifying its usage
+ * 
+ * @param usage usage of the task which we want to check if it's executable
+ * @return int 1 if it isn't executable, 0 if it is
+ */
 int isExecutable (int usage[7])
 {
     for (int i=0 ; i<7 ; i++)
@@ -83,6 +99,12 @@ int isExecutable (int usage[7])
     return 0;
 }
 
+/**
+ * @brief Function to check if a certain task is Valid (number of operations less than max operations)
+ * 
+ * @param usage usage of the task which we want to check if it's valid
+ * @return int 0 if valid, 1 if not valid
+ */
 int isValid (int usage[7])
 {
 	for (int i=0 ; i<7 ; i++)
@@ -90,11 +112,21 @@ int isValid (int usage[7])
 	return 0;
 }
 
+/**
+ * @brief Function to update the operationsInUse of the server when a task is being proccessed
+ * 
+ * @param usage usage of the task that is proccessing
+ */
 void useOperations (int usage[7])
 {
     for (int i=0 ; i<7 ; i++) operationsInUse[i] += usage[i];
 }
 
+/**
+ * @brief Function to update the operationsInUse of the server when a task is done
+ * 
+ * @param usage usage of the task that is Done
+ */
 void freeOperations (int usage[7])
 {
     for (int i=0 ; i<7 ; i++) operationsInUse[i] -= usage[i];
@@ -103,12 +135,17 @@ void freeOperations (int usage[7])
 
 /*                        Funcoes da lista de pedidos a ser processados */
 
+/**
+ * @brief Function to print every task in "pedidos"
+ */
 void printPedidos ()
 {
 	int isFirst = 1;
 	Queue aux = pedidos;
-	while (!(aux==pedidos && !isFirst))
+	while (aux && !(aux==pedidos && !isFirst))
 	{
+		if (aux==pedidos)
+			isFirst = 0;
 		char buffer[20];
 		int l = sprintf(buffer, "task #%d: ", aux->numP);
 		write(1, buffer, l);
@@ -118,84 +155,22 @@ void printPedidos ()
 	}
 }
 
-
+/**
+ * @brief Function to check if "pedidos" is empty
+ * 
+ * @return int 1 if empty, 0 if not empty
+ */
 int isPedidosEmpty ()
 {
     return (pedidos==NULL);
 }
 
-int removeDone ()
-{
-	if (!pedidos) return -1;
-
-	int removed = 1;
-
-	if (!(pedidos->last) && pedidos->pedido.status == Done)
-	{
-		freeOperations(pedidos->pedido.usage);
-		FREE(pedidos);
-		pedidos = NULL;
-		removed = 0;
-	}
-	else
-	{
-		Queue aux = pedidos;
-		while (aux && aux->prox && (aux->prox != pedidos))
-		{
-			if (aux->pedido.status == Done)
-			{
-				removed = 0;
-				if (aux == pedidos)
-				{
-					aux->prox->last = aux->last;
-					aux->last->prox = aux->prox;
-					pedidos = aux->prox;
-					freeOperations(aux->pedido.usage);
-					FREE(aux);
-				}
-				else 
-				{
-					aux->prox->last = aux->last;
-					aux->last->prox = aux->prox;
-					freeOperations(aux->pedido.usage);
-					FREE(aux);
-				}
-			}
-		}
-
-		if (aux->prox == aux->last)
-		{
-			if (aux->prox == aux && aux->pedido.status == Done)
-			{
-				removed = 0;
-				pedidos = NULL;
-				freeOperations(aux->pedido.usage);
-				FREE(aux);
-				return removed;
-			}
-			else if (aux->prox != aux && aux->pedido.status == Done)
-			{
-				removed = 0;
-				freeOperations(aux->pedido.usage);
-				aux->last->prox = NULL;
-				aux->last->last = NULL;
-				pedidos = aux->last;
-				FREE(aux);
-			}
-		}
-			
-		if (aux->pedido.status == Done)
-		{
-			removed = 0;
-			aux->prox->last = aux->last;
-			aux->last->prox = aux->prox;
-			freeOperations(aux->pedido.usage);
-			FREE(aux);
-		}
-	}
-	return removed;
-}
-
+/**
+ * @brief Function to remove a certain task from the proccessing list
+ * 
+ * @param pid pid of the task to remove from proccessing list
+ * @return int 0 if found, not zero if not found
+ */
 int removePedido (pid_t pid)
 {
     if (!pedidos) return -1;
@@ -240,7 +215,7 @@ int removePedido (pid_t pid)
         {
             freeOperations(aux->pedido.usage);
             aux->last->prox = aux->prox;
-	        aux->prox->last = aux->last;
+			aux->prox->last = aux->last;
             // if (aux) free(aux);
             if (aux == pedidos)
 			{
@@ -253,7 +228,14 @@ int removePedido (pid_t pid)
     return f;
 }
 
-
+/**
+ * @brief Function to push task to the processing list
+ * 
+ * @param pedido task to proccess
+ * @param pid proccess id of the proccess that is executing task
+ * @param numP number of task
+ * @return int 0 if everything went well
+ */
 int pushP (Pedido pedido, pid_t pid, int numP)
 {
     Queue node = malloc(sizeof (struct queue));
@@ -287,6 +269,9 @@ int pushP (Pedido pedido, pid_t pid, int numP)
 
 /*       Funcoes da lista de espera */
 
+/**
+ * @brief Function to print Waiting List
+ */
 void printWaitingList ()
 {
 	char buffer[1024] = {0};
@@ -297,13 +282,18 @@ void printWaitingList ()
 		while (q && !(q==waitingList[i] && verificouPrim))
 		{
 			if (q == waitingList[i]) verificouPrim=1;
-			int l = sprintf(buffer, "task #%d: %s", waitingList[i]->numP, waitingList[i]->pedido.line);
+			int l = sprintf(buffer, "task #%d: %s", q->numP, q->pedido.line);
 			write(1, buffer, l);
 			q = q->prox;
 		}
 	}
 }
 
+/**
+ * @brief Function to check if the Waiting List is empty
+ * 
+ * @return int 1 if empty, 0 if not empty
+ */
 int isWaitingListEmpty ()
 {
 	for (int i=0 ; i<=5 ; i++)
@@ -311,6 +301,15 @@ int isWaitingListEmpty ()
     return 1;
 }
 
+/**
+ * @brief Function to push task to the front of the Waiting List
+ * 
+ * @param pedido task to be pushed front
+ * @param priority priority of the task
+ * @param pid proccess id of the proccess that is going to proccess the task
+ * @param numP number of the task
+ * @return int 0 if everything went well
+ */
 int pushFrontWL (Pedido pedido, int priority, pid_t pid, int numP)
 {
 	if (priority>5 || priority<0) return -1;
@@ -375,6 +374,13 @@ int pushWL (Pedido pedido, int priority, pid_t pid, int numP)
     return 0;
 }
 
+/**
+ * @brief Function to take first element that is executable, in order of their priority
+ * 
+ * @param pedido Pointer to Pedido structure to store the task that is going to be proccessed
+ * @param n Pointer to integer to store the number of the task
+ * @return int 0 if everything went well
+ */
 int dequeueWL (Pedido *pedido, int *n)
 {
 	pid_t pid = -1;
@@ -430,6 +436,11 @@ int dequeueWL (Pedido *pedido, int *n)
 	return pid;
 }
 
+/**
+ * @brief Function to print the information about the server
+ * 
+ * It prints every task that is being proccessed, every task that is pending and the usage of operations
+ */
 void status ()
 {
 	// Print pedidos que estão a processar	
@@ -455,16 +466,46 @@ void status ()
 	}
 }
 
+/**
+ * @brief Function to ignore the SiGCONT signal on child proccesses
+ * 
+ * @param signum number of signal
+ */
 void recebeSinal (int signum)
 {
 }
 
+/**
+ * @brief Function to handle SIGTERM signal on child proccesses
+ * 
+ * If the child receives SIGTERM signal it sends the SIGTERM to father proccess
+ * 
+ * @param signum number of signal
+ */
 void childSIGTERMHandler (int signum)
 {
     kill(getppid(), SIGTERM);
 }
 
-
+/**
+ * @brief Function to proccess a certain task
+ * 
+ * Firstly the line that contains the task is tokenized ( tokenize(pedido.line) )
+ * 
+ * Then we check if the first token is equal to "proc-file", if it isn't the task isn't valid nothing is done
+ * 
+ * Then the integrity of the task is checked to see if everything else is valid.
+ * 
+ * It is checked wheter the task has any specified priority or not (in case the task needs to be pending), and then we have the proccessing of the task
+ * 
+ * A child proccess is created to proccess the task. First it is checked if the task can be executed. If it can be executed, the child uses a pipe to communicate to the father that the process
+ * is going to be executed or not, and the father adds it to the corresponing list.
+ * 
+ * Then the task is executed and everything that needs to be sent to the client is sent
+ * 
+ * @param pedido task to be proccessed
+ * @return int 
+ */
 int executePedido (Pedido pedido)
 {
     int filedes[2];
@@ -557,7 +598,7 @@ int executePedido (Pedido pedido)
 
 				if (read(filedes[0], &use, sizeof(int))<=0) 
 				{
-					perror("Error on resource management");
+					myPerror("Error on resource management");
 					exit(0);
 				}
 
@@ -573,6 +614,10 @@ int executePedido (Pedido pedido)
 				break;
 		}
 	}
+	else
+	{
+		return -1;
+	}
 
 	free(dup);
 	free(tokens);
@@ -580,40 +625,70 @@ int executePedido (Pedido pedido)
     return 0;
 }
 
+
+void swapProccesses ()
+{
+	pid_t pid;
+	Pedido aux;
+	int numP;
+	pid = dequeueWL(&aux, &numP);
+	while (pid!=-1)
+	{
+		if (kill(pid,  SIGCONT))
+			perror("Error unpausing proccess");
+		useOperations(aux.usage);
+		pushP(aux, aux.pid, numP);
+		pid = dequeueWL(&aux, &numP);
+	}
+}
+
+int escalateProccesses ()
+{
+	if (!isWaitingListEmpty() && isPedidosEmpty())
+		swapProccesses();
+	return 0;
+}
+
+/**
+ * @brief Function to send message to server saying that a task is done and it's usage should be freed
+ * 
+ * @param pedido Task containing the task saying which task should be freed
+ * @return int 0 if everything went well
+ */
 int freePedido (Pedido pedido)
 {
 	pid_t pid;
 	if (sscanf(pedido.line, "free %d\n", &pid)!=1)
 	{
-		perror("Erro a libertar recursos (ler pid)");
+		myPerror("Erro a libertar recursos (ler pid)");
 		exit(1);
 	}
 
 	if (removePedido(pid))
 	{
-		perror("Erro a libertar recursos (pedido nao encontrado)");
+		char buffer[128];
+		sprintf(buffer, "Erro a libertar recursos (pedido #%d nao encontrado)", pedido.pid);
+		myPerror(buffer);
 		exit(1);
 	}
 	
 	if (!isWaitingListEmpty())
-	{
-		Pedido aux;
-		int numP;
-		pid = dequeueWL(&aux, &numP);
-		while (pid!=-1)
-		{
-			if (kill(pid,  SIGCONT))
-				perror("Error unpausing proccess");
-			useOperations(aux.usage);
-			pushP(aux, aux.pid, numP);
-			pid = dequeueWL(&aux, &numP);
-		}
-	}
+		swapProccesses();
 
 	return 0;
 }
 
-int parsePedido (Pedido pedido, int *exitflag)
+/**
+ * @brief Function to parse the task that a client sent to the server
+ * 
+ * 	First it is checked if it is a free task, because it is the only message that can be executed if server is not receiving tasks
+ * 
+ *  Then, if the server is receiving tasks, it is checked if the task is status, if it is then status is printed, otherwise we send the task to be executed
+ * 
+ * @param pedido Task to be parsed
+ * @return int 0 if everything went well
+ */
+int parsePedido (Pedido pedido)
 {
     if (strstr(pedido.line, "free"))
 	{
@@ -634,6 +709,9 @@ int parsePedido (Pedido pedido, int *exitflag)
     return executePedido(pedido);
 }
 
+/**
+ * @brief Function to wait for every child of the parent proccess
+ */
 void esperarPorFilhos() {
     while (1) {
         int status;
@@ -648,11 +726,21 @@ void esperarPorFilhos() {
     }
 }
 
+/**
+ * @brief Handler of SIGTERM if server is closed to new tasks
+ * 
+ * @param signum number of signal
+ */
 void SIGTERMHandler2 (int signum) 
 {
 	receiving = 0;
 }
 
+/**
+ * @brief Handler of SIGTERM if the server is opened and receives SIGTERM signal
+ * 
+ * @param signum number of signal
+ */
 void SIGTERMHandler (int signum)
 {
     receiving = 0;
@@ -664,7 +752,7 @@ void SIGTERMHandler (int signum)
     {
         if ((r = read(readingEndFifo, &pedido, sizeof(struct pedido)))>0)
         {
-            if (parsePedido(pedido, NULL)==-1)
+            if (parsePedido(pedido)==-1)
             {
                 char fifoName[20] = {0};
                 sprintf(fifoName,"client%d", pedido.pid);
@@ -672,6 +760,9 @@ void SIGTERMHandler (int signum)
                 write(wef, "Error: programa nao esta a aceitar pedidos\n", 43);
             }
         }
+
+		if (!isWaitingListEmpty() && isPedidosEmpty())
+			swapProccesses();
     }
 
 
@@ -689,6 +780,16 @@ void SIGTERMHandler (int signum)
     exit(0);
 }
 
+void SIGCHLDhandler (int signum)
+{
+	wait(NULL);
+}
+
+/**
+ * @brief Function to initialize global variables of the server
+ * 
+ * @param configFile Path to configFile to configure the server
+ */
 void initializeGlobals (char *configFile)
 {
 	int fd;
@@ -704,12 +805,12 @@ void initializeGlobals (char *configFile)
 	while ((r=readln(fd, buffer, 64))>0)
 	{
 		if (!strncmp(buffer, "nop", 4)) sscanf(buffer, "nop %d\n", &maxOperations[nop]); //maxOperations[nop] =1;
-		else if (!strncmp(buffer, "bcompress", 9)) sscanf(buffer, "nop %d\n", &maxOperations[bcompress]); //maxOperations[bcompress]+=1;
-		else if (!strncmp(buffer, "bdecompress", 11)) sscanf(buffer, "nop %d\n", &maxOperations[bdecompress]); //maxOperations[bdecompress]+=1;
-		else if (!strncmp(buffer, "gcompress", 9)) sscanf(buffer, "nop %d\n", &maxOperations[gcompress]); //maxOperations[gcompress]+=1;
-		else if (!strncmp(buffer, "gdecompress", 11)) sscanf(buffer, "nop %d\n", &maxOperations[gdecompress]); //maxOperations[gdecompress]+=1;
-		else if (!strncmp(buffer, "encrypt", 7)) sscanf(buffer, "nop %d\n", &maxOperations[encrypt]); //maxOperations[encrypt]+=1;
-		else if (!strncmp(buffer, "decrypt", 7)) sscanf(buffer, "nop %d\n", &maxOperations[decrypt]); //maxOperations[decrypt]+=1;
+		else if (!strncmp(buffer, "bcompress", 9)) sscanf(buffer, "bcompress %d\n", &maxOperations[bcompress]); //maxOperations[bcompress]+=1;
+		else if (!strncmp(buffer, "bdecompress", 11)) sscanf(buffer, "bdecompress %d\n", &maxOperations[bdecompress]); //maxOperations[bdecompress]+=1;
+		else if (!strncmp(buffer, "gcompress", 9)) sscanf(buffer, "gcompress %d\n", &maxOperations[gcompress]); //maxOperations[gcompress]+=1;
+		else if (!strncmp(buffer, "gdecompress", 11)) sscanf(buffer, "gdecompress %d\n", &maxOperations[gdecompress]); //maxOperations[gdecompress]+=1;
+		else if (!strncmp(buffer, "encrypt", 7)) sscanf(buffer, "encrypt %d\n", &maxOperations[encrypt]); //maxOperations[encrypt]+=1;
+		else if (!strncmp(buffer, "decrypt", 7)) sscanf(buffer, "decrypt %d\n", &maxOperations[decrypt]); //maxOperations[decrypt]+=1;
 	}
 
 	close(fd);
@@ -718,6 +819,7 @@ void initializeGlobals (char *configFile)
 
     created_processes=0;
     receiving = 1;
+	numAtual = 0;
     for (int i=0 ; i<=5 ; i++) waitingList[i] = NULL;
     pedidos = NULL;
     maxOperations[nop]=3;
@@ -730,10 +832,15 @@ void initializeGlobals (char *configFile)
 	for (int i=0; i<7 ; i++) operationsInUse[i] = 0;
 }
 
+/**
+ * @brief Function to start the server
+ * 
+ * @param argc number of arguments
+ * @param args argument list
+ * @return int 0 if everything went well
+ */
 int main (int argc, char *args[])
 {
-    /* char buffer[BUF_SIZE]; **/
-
 	if (argc<3)
 	{
 		char buffer[] = "Usage: expected 2 arguments (config file and transformation directory)\n";
@@ -748,7 +855,7 @@ int main (int argc, char *args[])
 	strcpy(transfDirectory, args[2]);
 
     signal(SIGTERM, SIGTERMHandler);
-	/* signal(SIGCHLD, pedidoTermina2); */
+	signal(SIGCHLD, SIGCHLDhandler);
 
     if (mkfifo(FIFO, 0640)==-1)
     {
@@ -759,29 +866,19 @@ int main (int argc, char *args[])
         }
     }
 
-    /* if ((fd = open(LOG, O_WRONLY | O_TRUNC | O_CREAT, 0640))==-1) */
-    /* { */
-        /* perror("Error opening log.txt"); */
-        /* return 2; */
-    /* } */
-
     Pedido pedido;
 
     readingEndFifo = open(FIFO, O_RDONLY);
 	writingEndFifo = open(FIFO, O_WRONLY);
-    int r=0, exitFlag = 0;
+    int r=0;
 
-    while (!exitFlag)
-    {
-        while ((r = read(readingEndFifo, &pedido, sizeof(struct pedido)))>0)
-        {
-			parsePedido(pedido, &exitFlag);
-        }
-    }
+	while (!escalateProccesses() && (r = read(readingEndFifo, &pedido, sizeof(struct pedido)))>0)
+	{
+		parsePedido(pedido);
+	}
     
 
     close(readingEndFifo);
-    /* close(fd); */
 
     if (unlink(FIFO)==-1)
     {

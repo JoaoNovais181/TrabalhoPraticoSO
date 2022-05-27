@@ -81,13 +81,13 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 	int fde, fds;
 	if ((fde = open(tokens[0], O_RDONLY))==-1)
 	{
-		perror("Error opening input file. ");
+		perror("Error opening input file");
 		exit(errno);
 	}
 
 	if ((fds = open(tokens[1], O_TRUNC | O_WRONLY | O_CREAT, 0666))==-1)
 	{
-		perror("Error opening output file. ");
+		perror("Error opening output file");
 		exit(errno);
 	}
 
@@ -96,7 +96,7 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 		pid = fork();
 		if (pid==-1)
 		{
-			perror("Error on fork() call. ");
+			perror("Error on fork() call");
 			exit(errno);
 		}
 
@@ -104,7 +104,7 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 		{
 			char command[1024] = {0};
 			strcat(command, transfDirectory);
-			if (transfDirectory[strlen(transfDirectory)-1]!='/')
+			if (transfDirectory[strlen(transfDirectory)-1]!='/')  // Um path deve ser do tipo path/nomeFIcheiro, se faltar o / entre path e ficheiro é colocado
 				strcat(command, "/");
 			strcat(command, tokens[2]);
 			strcat(command, "\0");
@@ -118,14 +118,14 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 			wait(NULL);
 
 	}
-	else
+	else 
 	{
 		for (int i=0 ; i<nCommands ; i++)
 		{
 			filedes[i] = malloc(2*sizeof(int));
 			if (pipe(filedes[i])==-1)
 			{
-				perror("Error creating fifo.");
+				perror("Error creating fifo");
 				exit(errno);
 			}
 		}
@@ -136,7 +136,7 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 
 			if (pid==-1)
 			{
-				perror("Error on fork() call. ");
+				perror("Error on fork() call");
 				exit(errno);
 			}
 
@@ -144,7 +144,7 @@ int execute (char **tokens, int N, char *transfDirectory, int *entryBytes, int *
 			{
 				char command[1024] = {0};
 				strcat(command, transfDirectory);
-				if (transfDirectory[strlen(transfDirectory)-1]!='/')
+				if (transfDirectory[strlen(transfDirectory)-1]!='/') // Um path deve ser do tipo path/nomeFIcheiro, se faltar o / entre path e ficheiro é colocado
 					strcat(command, "/");
 				strcat(command, tokens[i+2]);
 				strcat(command, "\0");
