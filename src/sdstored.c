@@ -42,7 +42,6 @@ typedef struct queue
 } *Queue, *PriorityQueue[NUM_PRIORITIES];
 
 
-int fd;
 /** @brief File Descriptor to the reding end of the clientToServer fifo */
 int readingEndFifo;
  /** @brief File Descriptor to the writing end of the clientToServer fifo */ 
@@ -637,8 +636,6 @@ int executePedido (Pedido pedido)
 
 				execute(&tokens[inicio], N-inicio, transfDirectory, &entryBytes, &outBytes);
 
-				l=sprintf(buffer, "terminei %d\n", getpid());
-				write(fd ,buffer, l);
 
 				l = sprintf(buffer, "concluded (bytes-input: %d, bytes-output: %d)\n", entryBytes, outBytes);
 				write(wef, buffer, l);
@@ -647,7 +644,6 @@ int executePedido (Pedido pedido)
 				sprintf(buffer, "free %d\n", getpid());
 				Pedido ped = criaPedido(buffer, Done);
 				write(writingEndFifo, &ped, sizeof(struct pedido));
-				write(fd, buffer, strlen(buffer));
 				
 				close(wef);
 				free(dup);
@@ -949,8 +945,6 @@ int main (int argc, char *args[])
             return 2;
         }
     }
-
-	fd = open (LOG, O_CREAT | O_WRONLY | O_APPEND, 0640);
 
     Pedido pedido;
 
