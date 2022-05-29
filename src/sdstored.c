@@ -555,8 +555,7 @@ int main (int argc, char *args[])
         exit(errno);
     }
 
-    for (int i=0 ; i<created_processes ; i++)
-        wait(NULL);
+    esperarPorFilhos();
 
     return 0;
 }
