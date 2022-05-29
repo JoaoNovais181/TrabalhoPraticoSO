@@ -20,9 +20,8 @@
 
 #define FREE(algo) if (algo) free(algo);
 #define FIFO "clientToServer"
-#define LOG "log.txt"
 #define BUF_SIZE 1024
-#define NUM_PRIORITIES 6
+#define NUM_PRIORITIES 5
 
 /**
  * @typedef Queue 
@@ -503,51 +502,31 @@ void SIGTERMHandler (int signum)
  */
 void initializeGlobals (char *configFile)
 {
-	int fd;
+    int r = 0;
+    char buffer[64];
+    while ((r=readln(fd, buffer, 64))>0)
+    {
+    	if (!strncmp(buffer, "nop", 3)) sscanf(buffer, "nop %d\n", &maxOperations[nop]); 
+    	else if (!strncmp(buffer, "bcompress", 9)) sscanf(buffer, "bcompress %d\n", &maxOperations[bcompress]);
+    	else if (!strncmp(buffer, "bdecompress", 11)) sscanf(buffer, "bdecompress %d\n", &maxOperations[bdecompress]); //maxOperations[bdecompress]+=1;
+    	else if (!strncmp(buffer, "gcompress", 9)) sscanf(buffer, "gcompress %d\n", &maxOperations[gcompress]); //maxOperations[gcompress]+=1;
+    	else if (!strncmp(buffer, "gdecompress", 11)) sscanf(buffer, "gdecompress %d\n", &maxOperations[gdecompress]); //maxOperations[gdecompress]+=1;
+    	else if (!strncmp(buffer, "encrypt", 7)) sscanf(buffer, "encrypt %d\n", &maxOperations[encrypt]); //maxOperations[encrypt]+=1;
+    	else if (!strncmp(buffer, "decrypt", 7)) sscanf(buffer, "decrypt %d\n", &maxOperations[decrypt]); //maxOperations[decrypt]+=1;
+    }
 
-	if ((fd = open(configFile, O_RDONLY))==-1)
-	{
-		perror("Error opening config file. ");
-		exit(errno);
-	}
+    close(fd);
 
-	int r = 0;
-	char buffer[64];
-	while ((r=readln(fd, buffer, 64))>0)
-	{
-		if (!strncmp(buffer, "nop", 3)) sscanf(buffer, "nop %d\n", &maxOperations[nop]); 
-		else if (!strncmp(buffer, "bcompress", 9)) sscanf(buffer, "bcompress %d\n", &maxOperations[bcompress]);
-		else if (!strncmp(buffer, "bdecompress", 11)) sscanf(buffer, "bdecompress %d\n", &maxOperations[bdecompress]); //maxOperations[bdecompress]+=1;
-		else if (!strncmp(buffer, "gcompress", 9)) sscanf(buffer, "gcompress %d\n", &maxOperations[gcompress]); //maxOperations[gcompress]+=1;
-		else if (!strncmp(buffer, "gdecompress", 11)) sscanf(buffer, "gdecompress %d\n", &maxOperations[gdecompress]); //maxOperations[gdecompress]+=1;
-		else if (!strncmp(buffer, "encrypt", 7)) sscanf(buffer, "encrypt %d\n", &maxOperations[encrypt]); //maxOperations[encrypt]+=1;
-		else if (!strncmp(buffer, "decrypt", 7)) sscanf(buffer, "decrypt %d\n", &maxOperations[decrypt]); //maxOperations[decrypt]+=1;
-	}
-
-	close(fd);
-
-	transfDirectory = calloc(1024, sizeof(char));
+    transfDirectory = calloc(1024, sizeof(char));
 
     created_processes=0;
     receiving = 1;
-	numAtual = 1;
-	waitingList = malloc(NUM_PRIORITIES * sizeof(Queue));
+    numAtual = 1;
+    waitingList = malloc(NUM_PRIORITIES * sizeof(Queue));
     for (int i=0 ; i<=5 ; i++) waitingList[i] = NULL;
     pedidos = NULL;
-	for (int i=0; i<7 ; i++) operationsInUse[i] = 0;
+    for (int i=0; i<7 ; i++) operationsInUse[i] = 0;
 }
-
-/* void alarmHandler (int signum) */
-/* { */
-	/* printf("alarm\n"); */
-	/* pid_t pid = waitpid(-1, NULL, 1); */
-	/* while (pid!=-1) */
-	/* { */
-		/* removePedido(&pedidos, pid); */
-		/* pid = waitpid(-1, NULL, 1); */
-	/* } */
-	/* swapProccesses(); */
-/* } */
 
 /**
  * @brief Function to start the server
@@ -591,7 +570,6 @@ int main (int argc, char *args[])
 
 	while (!escalateProccesses() && (r = read(readingEndFifo, &pedido, sizeof(struct pedido)))>0)
 	{
-		/* alarm(10); */
 		parsePedido(pedido);
 	}
     
