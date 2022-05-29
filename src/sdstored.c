@@ -23,25 +23,6 @@
 #define BUF_SIZE 1024
 #define NUM_PRIORITIES 5
 
-/**
- * @typedef Queue 
- *  Definition of the data type Queue, used to store the tasks that are being proccessed, implemented with double linked lists
- *
- * @typedef PriorityQueue
- *	Definition of the data type PriorityQueue, used to implement priorities in our project, implemented with a 6 position array of double linked lists
- *
- * @struct queue
- *  data structure used as "blueprint" to the definition of Queue and PriorityQueue
- * */
-/* typedef struct queue */
-/* { */
-    /* Pedido pedido; */
-    /* pid_t pid; */
-    /* int numP; */
-	/* struct queue *prox, *last; */
-/* } *Queue, *PriorityQueue[NUM_PRIORITIES]; */
-
-
 /** @brief File Descriptor to the reding end of the clientToServer fifo */
 int readingEndFifo;
  /** @brief File Descriptor to the writing end of the clientToServer fifo */ 
@@ -96,14 +77,6 @@ char **tokenize (char *command, int *N)
 
     return exec_args;
 }
-
-
-/*   Funcoes de gestao de operacoes */
-
-
-
-
-/*                        Funcoes da lista de pedidos a ser processados */
 
 /**
  * @brief Function to ignore the SiGCONT signal on child proccesses
