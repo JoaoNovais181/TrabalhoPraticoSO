@@ -20,5 +20,9 @@ typedef struct pedido
 } Pedido, *PPedido;
 
 Pedido criaPedido (char *line, Status status);
+int isExecutable (int usage[7], int operationsInUse[7], int maxOperations[7]);
+int isValid (int usage[7], int maxOperations[7]);
+void useOperations (int usage[7], int operationsInUse[7]);
+void freeOperations (int usage[7], int operationsInUse[7]);
 
 #endif

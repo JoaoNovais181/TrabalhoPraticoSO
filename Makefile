@@ -12,8 +12,8 @@ bin/sdstore: obj/sdstore.o obj/Pedido.o obj/readln.o
 obj/sdstore.o: src/sdstore.c
 	gcc -c -r $(CFLAGS) src/sdstore.c -o obj/sdstore.o
 
-bin/sdstored: obj/sdstored.o obj/readln.o obj/Pedido.o obj/Execute.o
-	gcc $(CFLAGS) obj/sdstored.o obj/readln.o obj/Pedido.o obj/Execute.o -o bin/sdstored
+bin/sdstored: obj/sdstored.o obj/readln.o obj/Pedido.o obj/Execute.o obj/Queue.o
+	gcc $(CFLAGS) obj/sdstored.o obj/readln.o obj/Pedido.o obj/Execute.o obj/Queue.o -o bin/sdstored
 
 obj/sdstored.o: src/sdstored.c 
 	gcc -c -r $(CFLAGS) src/sdstored.c -o $@
@@ -26,6 +26,9 @@ obj/Pedido.o : src/Pedido.c
 
 obj/Execute.o : src/Execute.c
 	gcc -c -r $(CFLAGS) src/Execute.c -o $@
+
+obj/Queue.o : src/Queue.c
+	gcc -c -r $(CFLAGS) src/Queue.c -o $@
 
 transformations: nop bcompress bdecompress gcompress gdecompress encrypt decrypt
 
