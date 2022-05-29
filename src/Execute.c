@@ -13,12 +13,12 @@ void filho0 (int fde, int *filedes, char *command)
 {
     close(filedes[0]);
 
-	dup2(fde, 0);
-	close(fde);
+    dup2(fde, 0);
+    close(fde);
     dup2(filedes[1], 1);
     close(filedes[1]);
 
-	execl(command, command, NULL);
+    execl(command, command, NULL);
 }
 
 /**
@@ -34,10 +34,10 @@ void filhoN (int *filedes, int fds, char *command)
 
     dup2(filedes[0], 0);
     close(filedes[0]);
-	dup2(fds, 1);
-	close(fds);
+    dup2(fds, 1);
+    close(fds);
 
-	execl(command, command, NULL);
+    execl(command, command, NULL);
 }
 
 /**
@@ -59,7 +59,7 @@ void filhoi (int *filedesE, int *filedesS, char *command)
     close(filedesE[0]);
     close(filedesS[1]);
 
-	execl(command, command, NULL);
+    execl(command, command, NULL);
 }
 
 /**
