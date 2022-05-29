@@ -55,12 +55,7 @@ int main (int argc, char *args[])
         perror("Error opening clientToServer fifo!");
         exit(-1);
     }
-    // if (argc>1)
-    // {
-    //     for (int i=1 ; i<argc ; i++)
-    //         write(writingEndFifo, args[i], strlen(args[i]));
-    // }
-    
+
     sprintf(fifoName, "client%d", getpid());
     if (mkfifo(fifoName, 0640)==-1)
     {
@@ -158,12 +153,6 @@ int main (int argc, char *args[])
     {
         perror("Error unlinking fifo");
     }
-
-    // if (remove(fifoName)!=0)
-    // {
-        // perror("Error deleting fifo");
-        // return -1;
-    // }
 
 
     return 0;
