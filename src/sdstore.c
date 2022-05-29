@@ -64,7 +64,7 @@ int main (int argc, char *args[])
     }
 
     char line[BUF_SIZE] = {0};
-    int isExit = 0, i;
+    int  i;
 
 	Pedido pedido = criaPedido(line, Proccessing);
 
