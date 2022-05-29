@@ -1,0 +1,541 @@
+\hypertarget{sdstored_8c}{}\doxysection{sdstored.\+c File Reference}
+\label{sdstored_8c}\index{sdstored.c@{sdstored.c}}
+
+
+File that contains the implementation of the server SDSTORED.  
+
+
+{\ttfamily \#include $<$signal.\+h$>$}\newline
+{\ttfamily \#include $<$sys/stat.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$fcntl.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$sys/wait.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}readln.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Pedido.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Execute.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structqueue}{queue}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{sdstored_8c_a1e2e152d4d4eec649dd7e4aacd6add90}\label{sdstored_8c_a1e2e152d4d4eec649dd7e4aacd6add90}} 
+\#define {\bfseries FREE}(algo)~if (algo) free(algo);
+\item 
+\mbox{\Hypertarget{sdstored_8c_af6bc2702f6a1a4bb063b0726d90999da}\label{sdstored_8c_af6bc2702f6a1a4bb063b0726d90999da}} 
+\#define {\bfseries FIFO}~\char`\"{}client\+To\+Server\char`\"{}
+\item 
+\mbox{\Hypertarget{sdstored_8c_a159ca84d25a5487d8e81e4438725df19}\label{sdstored_8c_a159ca84d25a5487d8e81e4438725df19}} 
+\#define {\bfseries LOG}~\char`\"{}log.\+txt\char`\"{}
+\item 
+\mbox{\Hypertarget{sdstored_8c_a6821bafc3c88dfb2e433a095df9940c6}\label{sdstored_8c_a6821bafc3c88dfb2e433a095df9940c6}} 
+\#define {\bfseries BUF\+\_\+\+SIZE}~1024
+\item 
+\mbox{\Hypertarget{sdstored_8c_a47a8234e498e6606c2d17edf70ec2077}\label{sdstored_8c_a47a8234e498e6606c2d17edf70ec2077}} 
+\#define {\bfseries NUM\+\_\+\+PRIORITIES}~6
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structqueue}{queue}} $\ast$ \mbox{\hyperlink{sdstored_8c_a132fca995c7138f1e5171c60ac3fa3e3}{Queue}}
+\item 
+typedef struct \mbox{\hyperlink{structqueue}{queue}} $\ast$ \mbox{\hyperlink{sdstored_8c_a29b1f306f3a2c379e9de73af1dd7dd4e}{Priority\+Queue}}\mbox{[}NUM\+\_\+\+PRIORITIES\mbox{]}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{sdstored_8c_a2b339787fcc09cfd212c2f1a6223a1d8}{my\+Perror}} (const char $\ast$s)
+\begin{DoxyCompactList}\small\item\em Function that prints s to stderr. \end{DoxyCompactList}\item 
+char $\ast$$\ast$ \mbox{\hyperlink{sdstored_8c_aca2472818055b26a2ee68684bab34f87}{tokenize}} (char $\ast$command, int $\ast$N)
+\begin{DoxyCompactList}\small\item\em Tokenizes string by using \textquotesingle{} \textquotesingle{} as a delimiter. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a0d0a7b611bb9e788bff6889d4d3b3cd9}{is\+Executable}} (int usage\mbox{[}7\mbox{]})
+\begin{DoxyCompactList}\small\item\em Function to check if a certain task is executable, by verifying its usage. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a84499161291c6339f24a1fa90fbfeaf5}{is\+Valid}} (int usage\mbox{[}7\mbox{]})
+\begin{DoxyCompactList}\small\item\em Function to check if a certain task is Valid (number of operations less than max operations) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_a064222fdc0ba2027b23769bca8ca97b8}{use\+Operations}} (int usage\mbox{[}7\mbox{]})
+\begin{DoxyCompactList}\small\item\em Function to update the operations\+In\+Use of the server when a task is being proccessed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_a26708b85da0a433d5553052f0560474d}{free\+Operations}} (int usage\mbox{[}7\mbox{]})
+\begin{DoxyCompactList}\small\item\em Function to update the operations\+In\+Use of the server when a task is done. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_a5a29e2dd20985bd6485155dd73dd7f03}\label{sdstored_8c_a5a29e2dd20985bd6485155dd73dd7f03}} 
+void {\bfseries print\+Pedidos} ()
+\begin{DoxyCompactList}\small\item\em Function to print every task in \char`\"{}pedidos\char`\"{}. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a8f1895a2227e486b7dce4803f166770d}{is\+Pedidos\+Empty}} ()
+\begin{DoxyCompactList}\small\item\em Function to check if \char`\"{}pedidos\char`\"{} is empty. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_ab4b0778e64fc38795fb8b2cd5b7c7a93}{remove\+Pedido}} (pid\+\_\+t pid)
+\begin{DoxyCompactList}\small\item\em Function to remove a certain task from the proccessing list. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a838d790029ee2ad722ec98c4d831e380}{pushP}} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}}, pid\+\_\+t pid, int numP)
+\begin{DoxyCompactList}\small\item\em Function to push task to the processing list. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_aafd1a188e4c9a7e7ca92ad11887cc0bc}\label{sdstored_8c_aafd1a188e4c9a7e7ca92ad11887cc0bc}} 
+void {\bfseries print\+Waiting\+List} ()
+\begin{DoxyCompactList}\small\item\em Function to print every task in waiting\+List. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a10713e2350b5bcef22085e18d0fa0b80}{is\+Waiting\+List\+Empty}} ()
+\begin{DoxyCompactList}\small\item\em Function to check if the Waiting List is empty. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a7fe952b8500519702d6ff842493ca228}{push\+Front\+WL}} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}}, int priority, pid\+\_\+t pid, int numP)
+\begin{DoxyCompactList}\small\item\em Function to push task to the front of the Waiting List. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_a45d699d961e367c567e5f37fbc945905}\label{sdstored_8c_a45d699d961e367c567e5f37fbc945905}} 
+int {\bfseries push\+WL} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}}, int priority, pid\+\_\+t pid, int numP)
+\item 
+int \mbox{\hyperlink{sdstored_8c_ab84912bd0f55663d2a2dfcabcece7e1a}{dequeue\+WL}} (\mbox{\hyperlink{structpedido}{Pedido}} $\ast$\mbox{\hyperlink{structpedido}{pedido}}, int $\ast$n)
+\begin{DoxyCompactList}\small\item\em Function to take first element that is executable, in order of their priority. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_a23939106a6e2cda8545e50fc0635d0eb}{status}} ()
+\begin{DoxyCompactList}\small\item\em Function to print the information about the server. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_aecbf54b9c4d785dd144a3459ea1020fe}{recebe\+Sinal}} (int signum)
+\begin{DoxyCompactList}\small\item\em Function to ignore the Si\+GCONT signal on child proccesses. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_aba0b289dd31d3c7be81e55b5ae1e28d7}{child\+SIGTERMHandler}} (int signum)
+\begin{DoxyCompactList}\small\item\em Function to handle SIGTERM signal on child proccesses. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a27111192e96affba6360c9f82af31b17}{execute\+Pedido}} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}})
+\begin{DoxyCompactList}\small\item\em Function to proccess a certain task. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_aa63c6ca0dba1a14718fc2b864853439f}\label{sdstored_8c_aa63c6ca0dba1a14718fc2b864853439f}} 
+void {\bfseries swap\+Proccesses} ()
+\item 
+\mbox{\Hypertarget{sdstored_8c_a1acdd530b54991bfcd0dc411eb3eb2b2}\label{sdstored_8c_a1acdd530b54991bfcd0dc411eb3eb2b2}} 
+int {\bfseries escalate\+Proccesses} ()
+\item 
+int \mbox{\hyperlink{sdstored_8c_a44db75a6373f9ba8757811304460b623}{free\+Pedido}} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}})
+\begin{DoxyCompactList}\small\item\em Function to send message to server saying that a task is done and it\textquotesingle{}s usage should be freed. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_acd350c37d8ddfa51b56fe5ace9463352}{parse\+Pedido}} (\mbox{\hyperlink{structpedido}{Pedido}} \mbox{\hyperlink{structpedido}{pedido}})
+\begin{DoxyCompactList}\small\item\em Function to parse the task that a client sent to the server. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_a785a51c3f1bb778e7b41393401104f30}\label{sdstored_8c_a785a51c3f1bb778e7b41393401104f30}} 
+void {\bfseries esperar\+Por\+Filhos} ()
+\begin{DoxyCompactList}\small\item\em Function to wait for every child of the parent proccess. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_ab7be285e503349e2e423a1abe88763c7}{SIGTERMHandler2}} (int signum)
+\begin{DoxyCompactList}\small\item\em Handler of SIGTERM if server is closed to new tasks. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sdstored_8c_a85fbec7c4a325d7961c1a902c54e98ba}{SIGTERMHandler}} (int signum)
+\begin{DoxyCompactList}\small\item\em Handler of SIGTERM if the server is opened and receives SIGTERM signal. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_a8b0661715201b4038a632d21014ec906}\label{sdstored_8c_a8b0661715201b4038a632d21014ec906}} 
+void {\bfseries SIGCHLDhandler} (int signum)
+\item 
+void \mbox{\hyperlink{sdstored_8c_a08272e7bbf64e0109b3e1571cf6e343c}{initialize\+Globals}} (char $\ast$config\+File)
+\begin{DoxyCompactList}\small\item\em Function to initialize global variables of the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sdstored_8c_a700a0caa5b70a06d1064e576f9f3cf65}{main}} (int argc, char $\ast$args\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Function to start the server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{sdstored_8c_a5e3218de8c587e496d8a31f1ce821422}\label{sdstored_8c_a5e3218de8c587e496d8a31f1ce821422}} 
+int {\bfseries reading\+End\+Fifo}
+\begin{DoxyCompactList}\small\item\em File Descriptor to the reding end of the client\+To\+Server fifo. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_ab5d2ea869b736d42d07a5085a66b8d99}\label{sdstored_8c_ab5d2ea869b736d42d07a5085a66b8d99}} 
+int {\bfseries writing\+End\+Fifo}
+\begin{DoxyCompactList}\small\item\em File Descriptor to the writing end of the client\+To\+Server fifo. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{sdstored_8c_a7e0d70ada3a4085992b95831ae97a87f}\label{sdstored_8c_a7e0d70ada3a4085992b95831ae97a87f}} 
+int {\bfseries num\+Atual}
+\begin{DoxyCompactList}\small\item\em int to store the number that is given to the next task that comes to the server \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File that contains the implementation of the server SDSTORED. 
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{sdstored_8c_a29b1f306f3a2c379e9de73af1dd7dd4e}\label{sdstored_8c_a29b1f306f3a2c379e9de73af1dd7dd4e}} 
+\index{sdstored.c@{sdstored.c}!PriorityQueue@{PriorityQueue}}
+\index{PriorityQueue@{PriorityQueue}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{PriorityQueue}{PriorityQueue}}
+{\footnotesize\ttfamily Priority\+Queue}
+
+Definition of the data type Priority\+Queue, used to implement priorities in our project, implemented with a 6 position array of double linked lists \mbox{\Hypertarget{sdstored_8c_a132fca995c7138f1e5171c60ac3fa3e3}\label{sdstored_8c_a132fca995c7138f1e5171c60ac3fa3e3}} 
+\index{sdstored.c@{sdstored.c}!Queue@{Queue}}
+\index{Queue@{Queue}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{Queue}{Queue}}
+{\footnotesize\ttfamily \mbox{\hyperlink{sdstored_8c_a132fca995c7138f1e5171c60ac3fa3e3}{Queue}}}
+
+Definition of the data type Queue, used to store the tasks that are being proccessed, implemented with double linked lists 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{sdstored_8c_aba0b289dd31d3c7be81e55b5ae1e28d7}\label{sdstored_8c_aba0b289dd31d3c7be81e55b5ae1e28d7}} 
+\index{sdstored.c@{sdstored.c}!childSIGTERMHandler@{childSIGTERMHandler}}
+\index{childSIGTERMHandler@{childSIGTERMHandler}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{childSIGTERMHandler()}{childSIGTERMHandler()}}
+{\footnotesize\ttfamily void child\+SIGTERMHandler (\begin{DoxyParamCaption}\item[{int}]{signum }\end{DoxyParamCaption})}
+
+
+
+Function to handle SIGTERM signal on child proccesses. 
+
+If the child receives SIGTERM signal it sends the SIGTERM to father proccess
+
+
+\begin{DoxyParams}{Parameters}
+{\em signum} & number of signal \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_ab84912bd0f55663d2a2dfcabcece7e1a}\label{sdstored_8c_ab84912bd0f55663d2a2dfcabcece7e1a}} 
+\index{sdstored.c@{sdstored.c}!dequeueWL@{dequeueWL}}
+\index{dequeueWL@{dequeueWL}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{dequeueWL()}{dequeueWL()}}
+{\footnotesize\ttfamily int dequeue\+WL (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}} $\ast$}]{pedido,  }\item[{int $\ast$}]{n }\end{DoxyParamCaption})}
+
+
+
+Function to take first element that is executable, in order of their priority. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & Pointer to Pedido structure to store the task that is going to be proccessed \\
+\hline
+{\em n} & Pointer to integer to store the number of the task \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a27111192e96affba6360c9f82af31b17}\label{sdstored_8c_a27111192e96affba6360c9f82af31b17}} 
+\index{sdstored.c@{sdstored.c}!executePedido@{executePedido}}
+\index{executePedido@{executePedido}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{executePedido()}{executePedido()}}
+{\footnotesize\ttfamily int execute\+Pedido (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}}}]{pedido }\end{DoxyParamCaption})}
+
+
+
+Function to proccess a certain task. 
+
+Firstly the line that contains the task is tokenized ( tokenize(pedido.\+line) )
+
+Then we check if the first token is equal to \char`\"{}proc-\/file\char`\"{}, if it isn\textquotesingle{}t the task isn\textquotesingle{}t valid nothing is done
+
+Then the integrity of the task is checked to see if everything else is valid.
+
+It is checked wheter the task has any specified priority or not (in case the task needs to be pending), and then we have the proccessing of the task
+
+A child proccess is created to proccess the task. First it is checked if the task can be executed. If it can be executed, the child uses a pipe to communicate to the father that the process is going to be executed or not, and the father adds it to the corresponing list.
+
+Then the task is executed and everything that needs to be sent to the client is sent
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & task to be proccessed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a26708b85da0a433d5553052f0560474d}\label{sdstored_8c_a26708b85da0a433d5553052f0560474d}} 
+\index{sdstored.c@{sdstored.c}!freeOperations@{freeOperations}}
+\index{freeOperations@{freeOperations}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{freeOperations()}{freeOperations()}}
+{\footnotesize\ttfamily void free\+Operations (\begin{DoxyParamCaption}\item[{int}]{usage\mbox{[}7\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Function to update the operations\+In\+Use of the server when a task is done. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em usage} & usage of the task that is Done \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_a44db75a6373f9ba8757811304460b623}\label{sdstored_8c_a44db75a6373f9ba8757811304460b623}} 
+\index{sdstored.c@{sdstored.c}!freePedido@{freePedido}}
+\index{freePedido@{freePedido}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{freePedido()}{freePedido()}}
+{\footnotesize\ttfamily int free\+Pedido (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}}}]{pedido }\end{DoxyParamCaption})}
+
+
+
+Function to send message to server saying that a task is done and it\textquotesingle{}s usage should be freed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & Task containing the task saying which task should be freed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a08272e7bbf64e0109b3e1571cf6e343c}\label{sdstored_8c_a08272e7bbf64e0109b3e1571cf6e343c}} 
+\index{sdstored.c@{sdstored.c}!initializeGlobals@{initializeGlobals}}
+\index{initializeGlobals@{initializeGlobals}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{initializeGlobals()}{initializeGlobals()}}
+{\footnotesize\ttfamily void initialize\+Globals (\begin{DoxyParamCaption}\item[{char $\ast$}]{config\+File }\end{DoxyParamCaption})}
+
+
+
+Function to initialize global variables of the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em config\+File} & Path to config\+File to configure the server \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_a0d0a7b611bb9e788bff6889d4d3b3cd9}\label{sdstored_8c_a0d0a7b611bb9e788bff6889d4d3b3cd9}} 
+\index{sdstored.c@{sdstored.c}!isExecutable@{isExecutable}}
+\index{isExecutable@{isExecutable}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{isExecutable()}{isExecutable()}}
+{\footnotesize\ttfamily int is\+Executable (\begin{DoxyParamCaption}\item[{int}]{usage\mbox{[}7\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Function to check if a certain task is executable, by verifying its usage. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em usage} & usage of the task which we want to check if it\textquotesingle{}s executable \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 1 if it isn\textquotesingle{}t executable, 0 if it is 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a8f1895a2227e486b7dce4803f166770d}\label{sdstored_8c_a8f1895a2227e486b7dce4803f166770d}} 
+\index{sdstored.c@{sdstored.c}!isPedidosEmpty@{isPedidosEmpty}}
+\index{isPedidosEmpty@{isPedidosEmpty}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{isPedidosEmpty()}{isPedidosEmpty()}}
+{\footnotesize\ttfamily int is\+Pedidos\+Empty (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function to check if \char`\"{}pedidos\char`\"{} is empty. 
+
+\begin{DoxyReturn}{Returns}
+int 1 if empty, 0 if not empty 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a84499161291c6339f24a1fa90fbfeaf5}\label{sdstored_8c_a84499161291c6339f24a1fa90fbfeaf5}} 
+\index{sdstored.c@{sdstored.c}!isValid@{isValid}}
+\index{isValid@{isValid}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{isValid()}{isValid()}}
+{\footnotesize\ttfamily int is\+Valid (\begin{DoxyParamCaption}\item[{int}]{usage\mbox{[}7\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Function to check if a certain task is Valid (number of operations less than max operations) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em usage} & usage of the task which we want to check if it\textquotesingle{}s valid \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if valid, 1 if not valid 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a10713e2350b5bcef22085e18d0fa0b80}\label{sdstored_8c_a10713e2350b5bcef22085e18d0fa0b80}} 
+\index{sdstored.c@{sdstored.c}!isWaitingListEmpty@{isWaitingListEmpty}}
+\index{isWaitingListEmpty@{isWaitingListEmpty}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{isWaitingListEmpty()}{isWaitingListEmpty()}}
+{\footnotesize\ttfamily int is\+Waiting\+List\+Empty (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function to check if the Waiting List is empty. 
+
+\begin{DoxyReturn}{Returns}
+int 1 if empty, 0 if not empty 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a700a0caa5b70a06d1064e576f9f3cf65}\label{sdstored_8c_a700a0caa5b70a06d1064e576f9f3cf65}} 
+\index{sdstored.c@{sdstored.c}!main@{main}}
+\index{main@{main}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{args\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Function to start the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argc} & number of arguments \\
+\hline
+{\em args} & argument list \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a2b339787fcc09cfd212c2f1a6223a1d8}\label{sdstored_8c_a2b339787fcc09cfd212c2f1a6223a1d8}} 
+\index{sdstored.c@{sdstored.c}!myPerror@{myPerror}}
+\index{myPerror@{myPerror}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{myPerror()}{myPerror()}}
+{\footnotesize\ttfamily void my\+Perror (\begin{DoxyParamCaption}\item[{const char $\ast$}]{s }\end{DoxyParamCaption})}
+
+
+
+Function that prints s to stderr. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & String to print to stderr \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_acd350c37d8ddfa51b56fe5ace9463352}\label{sdstored_8c_acd350c37d8ddfa51b56fe5ace9463352}} 
+\index{sdstored.c@{sdstored.c}!parsePedido@{parsePedido}}
+\index{parsePedido@{parsePedido}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{parsePedido()}{parsePedido()}}
+{\footnotesize\ttfamily int parse\+Pedido (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}}}]{pedido }\end{DoxyParamCaption})}
+
+
+
+Function to parse the task that a client sent to the server. 
+
+\begin{DoxyVerb}First it is checked if it is a free task, because it is the only message that can be executed if server is not receiving tasks
+\end{DoxyVerb}
+ Then, if the server is receiving tasks, it is checked if the task is status, if it is then status is printed, otherwise we send the task to be executed
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & Task to be parsed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a7fe952b8500519702d6ff842493ca228}\label{sdstored_8c_a7fe952b8500519702d6ff842493ca228}} 
+\index{sdstored.c@{sdstored.c}!pushFrontWL@{pushFrontWL}}
+\index{pushFrontWL@{pushFrontWL}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{pushFrontWL()}{pushFrontWL()}}
+{\footnotesize\ttfamily int push\+Front\+WL (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}}}]{pedido,  }\item[{int}]{priority,  }\item[{pid\+\_\+t}]{pid,  }\item[{int}]{numP }\end{DoxyParamCaption})}
+
+
+
+Function to push task to the front of the Waiting List. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & task to be pushed front \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em pid} & proccess id of the proccess that is going to proccess the task \\
+\hline
+{\em numP} & number of the task \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a838d790029ee2ad722ec98c4d831e380}\label{sdstored_8c_a838d790029ee2ad722ec98c4d831e380}} 
+\index{sdstored.c@{sdstored.c}!pushP@{pushP}}
+\index{pushP@{pushP}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{pushP()}{pushP()}}
+{\footnotesize\ttfamily int pushP (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpedido}{Pedido}}}]{pedido,  }\item[{pid\+\_\+t}]{pid,  }\item[{int}]{numP }\end{DoxyParamCaption})}
+
+
+
+Function to push task to the processing list. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pedido} & task to proccess \\
+\hline
+{\em pid} & proccess id of the proccess that is executing task \\
+\hline
+{\em numP} & number of task \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if everything went well 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_aecbf54b9c4d785dd144a3459ea1020fe}\label{sdstored_8c_aecbf54b9c4d785dd144a3459ea1020fe}} 
+\index{sdstored.c@{sdstored.c}!recebeSinal@{recebeSinal}}
+\index{recebeSinal@{recebeSinal}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{recebeSinal()}{recebeSinal()}}
+{\footnotesize\ttfamily void recebe\+Sinal (\begin{DoxyParamCaption}\item[{int}]{signum }\end{DoxyParamCaption})}
+
+
+
+Function to ignore the Si\+GCONT signal on child proccesses. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em signum} & number of signal \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_ab4b0778e64fc38795fb8b2cd5b7c7a93}\label{sdstored_8c_ab4b0778e64fc38795fb8b2cd5b7c7a93}} 
+\index{sdstored.c@{sdstored.c}!removePedido@{removePedido}}
+\index{removePedido@{removePedido}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{removePedido()}{removePedido()}}
+{\footnotesize\ttfamily int remove\+Pedido (\begin{DoxyParamCaption}\item[{pid\+\_\+t}]{pid }\end{DoxyParamCaption})}
+
+
+
+Function to remove a certain task from the proccessing list. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pid} & pid of the task to remove from proccessing list \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int 0 if found, not zero if not found 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a85fbec7c4a325d7961c1a902c54e98ba}\label{sdstored_8c_a85fbec7c4a325d7961c1a902c54e98ba}} 
+\index{sdstored.c@{sdstored.c}!SIGTERMHandler@{SIGTERMHandler}}
+\index{SIGTERMHandler@{SIGTERMHandler}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{SIGTERMHandler()}{SIGTERMHandler()}}
+{\footnotesize\ttfamily void SIGTERMHandler (\begin{DoxyParamCaption}\item[{int}]{signum }\end{DoxyParamCaption})}
+
+
+
+Handler of SIGTERM if the server is opened and receives SIGTERM signal. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em signum} & number of signal \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_ab7be285e503349e2e423a1abe88763c7}\label{sdstored_8c_ab7be285e503349e2e423a1abe88763c7}} 
+\index{sdstored.c@{sdstored.c}!SIGTERMHandler2@{SIGTERMHandler2}}
+\index{SIGTERMHandler2@{SIGTERMHandler2}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{SIGTERMHandler2()}{SIGTERMHandler2()}}
+{\footnotesize\ttfamily void SIGTERMHandler2 (\begin{DoxyParamCaption}\item[{int}]{signum }\end{DoxyParamCaption})}
+
+
+
+Handler of SIGTERM if server is closed to new tasks. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em signum} & number of signal \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sdstored_8c_a23939106a6e2cda8545e50fc0635d0eb}\label{sdstored_8c_a23939106a6e2cda8545e50fc0635d0eb}} 
+\index{sdstored.c@{sdstored.c}!status@{status}}
+\index{status@{status}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{status()}{status()}}
+{\footnotesize\ttfamily void status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Function to print the information about the server. 
+
+It prints every task that is being proccessed, every task that is pending and the usage of operations \mbox{\Hypertarget{sdstored_8c_aca2472818055b26a2ee68684bab34f87}\label{sdstored_8c_aca2472818055b26a2ee68684bab34f87}} 
+\index{sdstored.c@{sdstored.c}!tokenize@{tokenize}}
+\index{tokenize@{tokenize}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{tokenize()}{tokenize()}}
+{\footnotesize\ttfamily char $\ast$$\ast$ tokenize (\begin{DoxyParamCaption}\item[{char $\ast$}]{command,  }\item[{int $\ast$}]{N }\end{DoxyParamCaption})}
+
+
+
+Tokenizes string by using \textquotesingle{} \textquotesingle{} as a delimiter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em command} & String to tokenize \\
+\hline
+{\em N} & Poiter to integer that will be written with the number of tokens in the string (if not NULL) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+List of tokens in string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{sdstored_8c_a064222fdc0ba2027b23769bca8ca97b8}\label{sdstored_8c_a064222fdc0ba2027b23769bca8ca97b8}} 
+\index{sdstored.c@{sdstored.c}!useOperations@{useOperations}}
+\index{useOperations@{useOperations}!sdstored.c@{sdstored.c}}
+\doxysubsubsection{\texorpdfstring{useOperations()}{useOperations()}}
+{\footnotesize\ttfamily void use\+Operations (\begin{DoxyParamCaption}\item[{int}]{usage\mbox{[}7\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Function to update the operations\+In\+Use of the server when a task is being proccessed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em usage} & usage of the task that is proccessing \\
+\hline
+\end{DoxyParams}

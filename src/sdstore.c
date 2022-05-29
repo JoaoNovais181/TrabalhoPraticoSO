@@ -82,7 +82,6 @@ int main (int argc, char *args[])
 			exit(-1);
 		}
 		strcpy(pedido.line, args[1]); 
-		isExit = 1;
 	}
 	else if (argc > 4)
 	{
@@ -142,20 +141,17 @@ int main (int argc, char *args[])
     
     close(writingEndFifo);
     
-    if (!isExit)
-    {
-        int readingEndFifo = open(fifoName, O_RDONLY);
+	int readingEndFifo = open(fifoName, O_RDONLY);
 
-		char *str = malloc(BUF_SIZE);
-	
-		while ((i=read(readingEndFifo, str, BUF_SIZE))>0)
-        {
-            write(1, str, i);
-            if (strstr(str, "Error"))
-                break;
-        }
-        close(readingEndFifo);
-    }
+	char *str = malloc(BUF_SIZE);
+
+	while ((i=read(readingEndFifo, str, BUF_SIZE))>0)
+	{
+		write(1, str, i);
+		if (strstr(str, "Error"))
+			break;
+	}
+	close(readingEndFifo);
     
     
     if (unlink(fifoName)==-1)
